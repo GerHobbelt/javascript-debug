@@ -37,6 +37,7 @@
 // About: Revision History
 //
 // 0.4 - (6/22/2010) Added missing passthrough methods: exception, groupCollapsed, table
+//
 // 0.3 - (6/8/2009) Initial release
 //
 // Topic: Pass-through console methods
@@ -98,7 +99,7 @@ window.debug = (function ()
 				{
 					if(con[method] && typeof(con[method].apply) != 'undefined')
 					{
-						con[method].apply(con, arguments);
+						con[method].apply(con, arguments); // FireFox || Firebug Lite || Opera || Chrome
 					}
 					else
 					{
@@ -106,7 +107,7 @@ window.debug = (function ()
 						if(method.indexOf('group') != -1)
 						{
 							args.unshift('['+method+']');
-							that['log'](args.join(' '));
+							that['log'](args.join(' ')); // IE 8 (at least)
 						}
 					}
 				}
