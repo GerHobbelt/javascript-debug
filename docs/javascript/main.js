@@ -565,7 +565,7 @@ function SearchPanel(name, mode, resultsPath)
             // just doesn't work in IE 6 or IE 7.  So if we're on the right page but the previous search had no results, reload the
             // page anyway to get around the bug.
             (browserType == "IE" && hasResultsPage &&
-            	(!resultsFrame.searchResults || resultsFrame.searchResults.lastMatchCount == 0)) )
+                (!resultsFrame.searchResults || resultsFrame.searchResults.lastMatchCount == 0)) )
 
             {
             resultsFrame.location.href = resultsPageWithSearch;
@@ -666,8 +666,8 @@ function SearchPanel(name, mode, resultsPath)
         this.DOMSearchPanel().className = 'MSearchPanelInactive';
         this.DOMSearchField().value = "Search";
 
-	    this.lastSearchValue = "";
-	    this.lastResultsPage = "";
+        this.lastSearchValue = "";
+        this.lastResultsPage = "";
         };
     };
 

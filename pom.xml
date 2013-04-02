@@ -53,12 +53,12 @@
     <system>Trac</system>
     <url>https://trac.softec.lu/opensource</url>
   </issueManagement>
-  
+
   <scm>
     <connection>scm:svn:http://svn.softec.lu/js/debug</connection>
     <developerConnection>scm:svn:https://svn.softec.lu/js/debug</developerConnection>
     <url>http://svn.softec.lu/js/debug</url>
-  </scm>  
+  </scm>
 
   <build>
     <outputDirectory>target/scripts</outputDirectory>
@@ -154,5 +154,5 @@
       <url>http://nexus.softec.lu:8081/content/repositories/opensource</url>
     </repository>
   </distributionManagement>
-  
+
 </project>

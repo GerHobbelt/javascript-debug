@@ -3,7 +3,7 @@ Debug
 
 #### A simple wrapper for Console.log ####
 
-This code provides a simple wrapper for the console's logging methods, 
+This code provides a simple wrapper for the console's logging methods,
 and was created to allow a very easy-to-use, cross-browser logging solution,
 without requiring excessive or unwieldy object detection. If a console object
 is not detected, all logged messages will be stored internally until a logging
