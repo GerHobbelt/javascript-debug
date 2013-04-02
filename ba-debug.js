@@ -1,7 +1,8 @@
 /*
+ * Derived work
  * Copyright 2010 SOFTEC sa. All rights reserved.
  *
- * Derived from
+ * Original work
  *   JavaScript Debug - v0.4 - 6/22/2010
  *   http://benalman.com/projects/javascript-debug-console-log/
  *   Copyright (c) 2010 "Cowboy" Ben Alman
@@ -152,12 +153,14 @@ var debug = (function(debug, window){
     callback_func = args.shift() || null;
     callback_force = typeof args[0] === 'boolean' ? args.shift() : false;
 
-    i -= typeof args[0] === 'number' ? args.shift() : max;
+    if ( callback_func && (callback_force || !con || !con.log) ) {
+      i -= typeof args[0] === 'number' ? args.shift() : max;
 
-    while ( i < max ) {
-      exec_callback( logs[i++] );
+      while ( i < max ) {
+        callback_func.apply( window, logs[i++] );
+      }
     }
   };
 
   return debug;
-})(debug || {}, window);
+})(debug || {}, this);
