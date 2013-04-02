@@ -83,7 +83,11 @@ describe('debug', function() {
         con[logger] = function() {};
         spyOn(con, logger);
         debug[method]('an argument for ' + method,'another argument for ' + method);
-        expect(con[logger]).toHaveBeenCalledWith(['an argument for ' + method,'another argument for ' + method]);
+        if( logger !== method ) {
+           expect(con[logger]).toHaveBeenCalledWith([method.toUpperCase(),'an argument for ' + method,'another argument for ' + method]);
+        } else {
+           expect(con[logger]).toHaveBeenCalledWith(['an argument for ' + method,'another argument for ' + method]);
+        }
       });
     }
   );
@@ -98,7 +102,7 @@ describe('debug', function() {
         con['log'] = function() {};
         spyOn(con, 'log');
         debug[method]('an argument for ' + method,'another argument for ' + method);
-        expect(con['log']).toHaveBeenCalledWith(['an argument for ' + method,'another argument for ' + method]);
+        expect(con['log']).toHaveBeenCalledWith([method.toUpperCase(), 'an argument for ' + method,'another argument for ' + method]);
       });
     }
   );
@@ -156,7 +160,11 @@ describe('debug', function() {
         if( level <= 3 ) {
           expect(con[logger]).not.toHaveBeenCalled();
         } else {
-          expect(con[logger]).toHaveBeenCalledWith(['an argument for ' + method,'another argument for ' + method]);
+          if( logger !== method ) {
+            expect(con[logger]).toHaveBeenCalledWith([method.toUpperCase(),'an argument for ' + method,'another argument for ' + method]);
+          } else {
+            expect(con[logger]).toHaveBeenCalledWith(['an argument for ' + method,'another argument for ' + method]);
+          }
         }
       }
     );
@@ -180,7 +188,11 @@ describe('debug', function() {
         if( level > 3 ) {
           expect(con[logger]).not.toHaveBeenCalled();
         } else {
-          expect(con[logger]).toHaveBeenCalledWith(['an argument for ' + method,'another argument for ' + method]);
+          if( logger !== method ) {
+            expect(con[logger]).toHaveBeenCalledWith([method.toUpperCase(),'an argument for ' + method,'another argument for ' + method]);
+          } else {
+            expect(con[logger]).toHaveBeenCalledWith(['an argument for ' + method,'another argument for ' + method]);
+          }
         }
       }
     );
