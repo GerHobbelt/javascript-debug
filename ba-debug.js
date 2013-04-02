@@ -89,6 +89,7 @@ window.debug = (function ()
     idx = pass_methods.length,
 
     domInsertion = false,
+    domArgJoin = [": ", ", "],                  // either an array of strings or a user-defined function; used to join array elements (see join_arr())
     domWriter = document.createElement('div'),
 
     // Logs are stored here so that they can be recalled as necessary.
@@ -208,7 +209,7 @@ window.debug = (function ()
                 logs.push(log_arr);
                 if (domInsertion)
                 {
-                    var txtNode = document.createTextNode(log_arr);
+                    var txtNode = document.createTextNode(join_arr(log_arr, domArgJoin));
                     domWriter.appendChild(txtNode);
                     domWriter.appendChild(document.createElement('br'));
                 }
@@ -251,6 +252,24 @@ window.debug = (function ()
         {
             con[level](args.join(' ')); // IE 8 (at least)
         }
+    }
+
+    // Join arguments using the specified separator(s):
+    function join_arr(arr, seps) {
+        var rv = "";
+        var i, si;
+
+        if (typeof seps === "function") {
+            return seps.call(arr, seps);
+        } 
+        for (i = 0; i < arr.length - 1; i++) {
+            si = Math.min(i, seps.length - 1);
+            rv += String(arr[i]) + String(seps[si]);
+        }
+        if (i < arr.length) {
+            rv += arr[i];
+        }
+        return rv;
     }
 
     // Execute the callback function if set.
@@ -337,9 +356,15 @@ window.debug = (function ()
         }
     };
 
-    that.setDomInsertion = function (active, className)
+    that.setDomInsertion = function (active, className, arg_join)
     {
         domInsertion = active;
+        if (typeof arg_join === "function") {
+            domArgJoin = arg_join;
+        } else if (domArgJoin) {
+            // http://stackoverflow.com/questions/4775722/javascript-check-if-object-is-array
+            domArgJoin = [].concat(arg_join);
+        }
         if (active && document.body)
         {
             document.body.appendChild(domWriter);
@@ -349,7 +374,9 @@ window.debug = (function ()
             domWriter.className = c;
         }
         else
+        {
             domWriter.parentNode.removeChild(domWriter);
+        }
     };
 
     function isElement(obj)
