@@ -153,14 +153,12 @@ var debug = (function(debug, window){
     callback_func = args.shift() || null;
     callback_force = typeof args[0] === 'boolean' ? args.shift() : false;
 
-    if ( callback_func && (callback_force || !con || !con.log) ) {
-      i -= typeof args[0] === 'number' ? args.shift() : max;
+    i -= typeof args[0] === 'number' ? args.shift() : max;
 
-      while ( i < max ) {
-        callback_func.apply( window, logs[i++] );
-      }
+    while ( i < max ) {
+      exec_callback( logs[i++] );
     }
   };
 
   return debug;
-})(debug || {}, this);
+})(debug || {}, window);
