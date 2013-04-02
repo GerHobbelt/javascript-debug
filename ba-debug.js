@@ -93,7 +93,8 @@ var debug = (function(debug, window){
 
         if ( !con || !is_level( idx ) ) { return; }
 
-        (con.firebug || con.firebuglite) ? con[ logger ].apply( con, args )
+        (con.firebug || con.firebuglite || con.markTimeline) ? con[ logger ].apply( con, args )
+          : (con.log === print) ? con[ logger ].call(window, args ) // workaround for a consolex issue
           : con[ logger ] ? con[ logger ]( args )
           : con.log( args );
       };
