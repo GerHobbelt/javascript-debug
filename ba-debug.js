@@ -128,7 +128,7 @@ window.debug = (function ()
     idx = log_methods.length;
     while (--idx >= 0)
     {
-        (function( idx, level, logger, Ulevel, withLevel ){
+        (function( idx, level, logger, Ulevel, withLevel )
         {
 
             // Method: debug.log
