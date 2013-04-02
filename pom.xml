@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  * Copyright 2010 SOFTEC sa. All rights reserved.
+  *
+  * Permission is hereby granted, free of charge, to any person obtaining a copy
+  * of this software and associated documentation files (the "Software"), to deal
+  * in the Software without restriction, including without limitation the rights
+  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  * copies of the Software, and to permit persons to whom the Software is
+  * furnished to do so, subject to the following conditions:
+  *
+  * The above copyright notice and this permission notice shall be included in
+  * all copies or substantial portions of the Software.
+  *
+  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  * THE SOFTWARE.
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>lu.softec.js</groupId>
+  <artifactId>debug</artifactId>
+  <version>0.4</version>
+  <packaging>javascript</packaging>
+
+  <name>Javascript Debug library</name>
+  <description>debug.js borrowed from http://benalman.com/projects/javascript-debug-console-log/</description>
+  <url>http://www.softec.lu/js/debug</url>
+
+  <developers>
+    <developer>
+      <id>DenisG</id>
+      <name>Denis Gervalle</name>
+      <email>Denis.Gervalle@softec.lu</email>
+      <organization>SOFTEC sa</organization>
+      <organizationUrl>http://softec.lu/</organizationUrl>
+      <roles>
+        <role>CEO</role>
+        <role>developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
+  </developers>
+
+  <issueManagement>
+    <system>Trac</system>
+    <url>https://trac.softec.lu/opensource</url>
+  </issueManagement>
+  
+  <scm>
+    <connection>scm:svn:http://svn.softec.lu/js/debug</connection>
+    <developerConnection>scm:svn:https://svn.softec.lu/js/debug</developerConnection>
+    <url>http://svn.softec.lu/js/debug</url>
+  </scm>  
+
+  <build>
+    <outputDirectory>target/scripts</outputDirectory>
+    <testOutputDirectory>target/test-scripts</testOutputDirectory>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo.javascript</groupId>
+        <artifactId>javascript-maven-plugin</artifactId>
+        <version>1.0-softec</version>
+        <extensions>true</extensions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.3</version>
+        <configuration>
+          <encoding>UTF-8</encoding>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo.javascript</groupId>
+            <artifactId>javascript-maven-plugin</artifactId>
+            <configuration>
+              <compressor>yahooUI</compressor>
+              <optimizationLevel>5</optimizationLevel>
+            </configuration>
+            <executions>
+              <execution>
+                <id>compress</id>
+                <phase>compile</phase>
+                <goals>
+                  <goal>compress</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>test-compressed</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>prepare-jasmine-tests</goal>
+                  <goal>jasmine</goal>
+                </goals>
+                <configuration>
+                  <sourceDirectory>${project.build.directory}/compressed</sourceDirectory>
+                  <jasmineTargetDir>${project.build.directory}/jasmine-compressed</jasmineTargetDir>
+                </configuration>
+              </execution>
+              <execution>
+                <id>package-compressed</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>attach-compressed</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+  <repositories>
+    <repository>
+      <releases />
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>softec-opensource</id>
+      <url>http://nexus.softec.lu:8081/content/repositories/opensource</url>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <releases />
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>softec-opensource</id>
+      <url>http://nexus.softec.lu:8081/content/repositories/opensource</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <distributionManagement>
+    <repository>
+      <id>softec-opensource</id>
+      <name>Release Distribution Repository</name>
+      <url>http://nexus.softec.lu:8081/content/repositories/opensource</url>
+    </repository>
+  </distributionManagement>
+  
+</project>
