@@ -40,6 +40,7 @@ var debug = (function(debug, window){
       callback_force,
 
       // Default logging level, show everything but code traces.
+      default_log_level = 5,
       log_level = 5,
 
       // Logging methods, in "priority order". Not all console implementations
@@ -130,7 +131,7 @@ var debug = (function(debug, window){
    *                       callTrace(6) > log (5) > debug (4) > info (3) > warn (2) > error (1)
    */
   debug.setLevel = function( level ) {
-    log_level = typeof level === 'number' ? level : 5;
+    log_level = typeof level === 'number' ? level : default_log_level;
   };
 
   /**
@@ -175,4 +176,4 @@ var debug = (function(debug, window){
   };
 
   return debug;
-})(debug || {}, window);
+})(debug || {}, typeof window !== "undefined") ? window : this);
