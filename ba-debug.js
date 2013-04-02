@@ -24,24 +24,29 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
+ *
+ * Here is a bookmarket for activating firebuglite and dump the history log:
+ * javascript:(function(F,i,r,e,b,u,g,L,I,T,E){if(F.getElementById(b))return;E=F[i+'NS']&&F.documentElement.namespaceURI;E=E?F[i+'NS'](E,'script'):F[i]('script');E[r]('id',b);E[r]('src',I+g);E[r](b,u);E.text=T;(F[e]('head')[0]||F[e]('body')[0]).appendChild(E);E=new%20Image;E[r]('src',I+L);})(document,'createElement','setAttribute','getElementsByTagName','FirebugLite','4','firebug-lite.js','releases/lite/latest/skin/xp/sprite.png','https://getfirebug.com/','{startOpened:true,onLoad:function(){if(window.debug&&debug.setCallback){debug.setCallback(function(b){var a=Array.prototype.slice.call(arguments,1);console[b].apply(window,a);},true)}}}');
+ *
  */
 
 var debug = (function(debug, window){
 
-      // Some convenient shortcuts.
+  // Some convenient shortcuts.
   var aps = Array.prototype.slice,
       con = window.console,
 
       callback_func,
       callback_force,
 
-      // Default logging level, show everything.
-      log_level = 9,
+      // Default logging level, show everything but code traces.
+      log_level = 5,
 
       // Logging methods, in "priority order". Not all console implementations
       // will utilize these, but they will be used in the callback passed to
-      // setCallback.
-      log_methods = [ 'error', 'warn', 'info', 'debug', 'log' ],
+      // setCallback. Last one is a special addition to allow a lower level
+      // than log to exist and be used for special purposes.
+      log_methods = [ 'error', 'warn', 'info', 'debug', 'log', 'callTrace' ],
 
       // Pass these methods through to the console if they exist, otherwise just
       // fail gracefully. These methods are provided for convenience.
@@ -71,28 +76,36 @@ var debug = (function(debug, window){
 
   idx = log_methods.length;
   while ( --idx >= 0 ) {
-    (function( idx, level ){
+    (function( idx, level, logger ){
       /**
        * Call the console equivalent method if available, otherwise call console.log.
        * Adds an entry into the logs array for a future callback that could be specified via
        * <debug.setCallback>.
-       * This function is applied for log(), debug(), info(), warn() and error()
+       * This function is applied for codetrace(), log(), debug(), info(), warn() and error()
        */
       debug[ level ] = function() {
         var args = aps.call( arguments ),
-          log_arr = [ level ].concat( args );
+            log_arr = [ level ].concat( args );
 
         logs.push( log_arr );
         exec_callback( log_arr );
 
         if ( !con || !is_level( idx ) ) { return; }
 
-        con.firebug ? con[ level ].apply( window, args )
-          : con[ level ] ? con[ level ]( args )
+        (con.firebug || con.firebuglite) ? con[ logger ].apply( con, args )
+          : con[ logger ] ? con[ logger ]( args )
           : con.log( args );
       };
 
-    })( idx, log_methods[idx] );
+      /**
+       * Check if provided level is currently actively logged
+       * @param level
+       */
+      debug['is'+level.substring(0,1).toUpperCase()+level.substring(1)+'Enabled'] = function() {
+        return is_level(idx);
+      };
+
+    })( idx, log_methods[idx], log_methods[Math.min(idx,4)] );
   }
 
   /**
@@ -110,18 +123,19 @@ var debug = (function(debug, window){
    * the <debug.setCallback> callback function, but if set to 0 to disable
    * logging, <Pass-through console methods> will be disabled as well.
    *
-   * @param {number} level If 0, disables logging. If negative, shows N lowest
-   *                       priority levels of log messages. If positive, shows
-   *                       N highest priority levels of log messages. Here is
-   *                       the log level:
-   *                       log (1) < debug (2) < info (3) < warn (4) < error (5)
+   * @param {number} level If 0, disables logging.
+   *                       If negative, shows N lowest priority levels of log messages.
+   *                       callTrace(1) < log (2) < debug (3) < info (4) < warn (5) < error (6)
+   *                       If positive, shows N highest priority levels of log messages.
+   *                       callTrace(6) > log (5) > debug (4) > info (3) > warn (2) > error (1)
    */
   debug.setLevel = function( level ) {
-    log_level = typeof level === 'number' ? level : 9;
+    log_level = typeof level === 'number' ? level : 5;
   };
 
   /**
    * Determine if the level is visible given the current log_level.
+   * Note that level is minus one compared to log_level
    * @private
    * @param {number} level to check
    */

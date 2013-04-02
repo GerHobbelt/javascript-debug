@@ -19,10 +19,10 @@ describe('debug', function() {
         // will utilize these, but they will be used in the callback passed to
         // setCallback.
         checkLogMethods = function(fn) {
-          var log_methods = [ 'error', 'warn', 'info', 'debug', 'log' ];
+          var log_methods = [ 'error', 'warn', 'info', 'debug', 'log', 'callTrace' ];
           var idx = log_methods.length
           while ( --idx >= 0 ) {
-            fn(log_methods[idx],log_methods.length-idx);
+            fn(log_methods[idx],log_methods[Math.min(idx,4)],idx+1);
           }
         },
 
@@ -41,6 +41,13 @@ describe('debug', function() {
 
   it('define debug in global scope', function() {
     expect(debug).toBeDefined();
+  });
+
+  it('define debug in global scope', function() {
+    expect(debug.isLogEnabled()).toBeTruthy();
+    expect(debug.isCallTraceEnabled()).toBeFalsy();
+    debug.setLevel(6);
+    expect(debug.isCallTraceEnabled()).toBeTruthy();
   });
 
   checkPassMethods(
@@ -71,22 +78,23 @@ describe('debug', function() {
   );
 
   checkLogMethods (
-    function(method){
-      it('pass debug.' + method + '() calls to console.' + method +'()', function() {
-        con[method] = function() {};
-        spyOn(con, method);
+    function(method, logger){
+      it('pass debug.' + method + '() calls to console.' + logger +'()', function() {
+        con[logger] = function() {};
+        spyOn(con, logger);
         debug[method]('an argument for ' + method,'another argument for ' + method);
-        expect(con[method]).toHaveBeenCalledWith(['an argument for ' + method,'another argument for ' + method]);
+        expect(con[logger]).toHaveBeenCalledWith(['an argument for ' + method,'another argument for ' + method]);
       });
     }
   );
 
   checkLogMethods (
-    function(method){
-      if( method == 'log' ) return;
+    function(method, logger){
+      if( logger == 'log' ) return;
       it('have debug.' + method + '() calls falling back to console.log()', function() {
         delete con[method];
         delete con['firebug'];
+        delete con['firebuglite'];
         con['log'] = function() {};
         spyOn(con, 'log');
         debug[method]('an argument for ' + method,'another argument for ' + method);
@@ -141,17 +149,19 @@ describe('debug', function() {
     debug.setCallback(callback,true,0);
     debug.setLevel(-3);
     checkLogMethods (
-      function(method, level){
-        con[method] = function() {};
-        spyOn(con, method);
+      function(method, logger, level){
+        con[logger] = function() {};
+        spyOn(con, logger);
         debug[method]('an argument for ' + method,'another argument for ' + method);
-        if( level > 3 ) {
-          expect(con[method]).not.toHaveBeenCalled();
+        if( level <= 3 ) {
+          expect(con[logger]).not.toHaveBeenCalled();
         } else {
-          expect(con[method]).toHaveBeenCalledWith(['an argument for ' + method,'another argument for ' + method]);
+          expect(con[logger]).toHaveBeenCalledWith(['an argument for ' + method,'another argument for ' + method]);
         }
       }
     );
+    expect(callback).toHaveBeenCalledWith( 'callTrace', 'an argument for callTrace', 'another argument for callTrace' );
+    expect(callback).toHaveBeenCalledWith( 'log', 'an argument for log', 'another argument for log' );
     expect(callback).toHaveBeenCalledWith( 'debug', 'an argument for debug', 'another argument for debug' );
     expect(callback).toHaveBeenCalledWith( 'info', 'an argument for info', 'another argument for info' );
     expect(callback).toHaveBeenCalledWith( 'warn', 'an argument for warn', 'another argument for warn' );
@@ -163,17 +173,19 @@ describe('debug', function() {
     debug.setCallback(callback,true,0);
     debug.setLevel(3);
     checkLogMethods (
-      function(method, level){
-        con[method] = function() {};
-        spyOn(con, method);
+      function(method, logger, level){
+        con[logger] = function() {};
+        spyOn(con, logger);
         debug[method]('an argument for ' + method,'another argument for ' + method);
-        if( level < 3 ) {
-          expect(con[method]).not.toHaveBeenCalled();
+        if( level > 3 ) {
+          expect(con[logger]).not.toHaveBeenCalled();
         } else {
-          expect(con[method]).toHaveBeenCalledWith(['an argument for ' + method,'another argument for ' + method]);
+          expect(con[logger]).toHaveBeenCalledWith(['an argument for ' + method,'another argument for ' + method]);
         }
       }
     );
+    expect(callback).toHaveBeenCalledWith( 'callTrace', 'an argument for callTrace', 'another argument for callTrace' );
+    expect(callback).toHaveBeenCalledWith( 'log', 'an argument for log', 'another argument for log' );
     expect(callback).toHaveBeenCalledWith( 'debug', 'an argument for debug', 'another argument for debug' );
     expect(callback).toHaveBeenCalledWith( 'info', 'an argument for info', 'another argument for info' );
     expect(callback).toHaveBeenCalledWith( 'warn', 'an argument for warn', 'another argument for warn' );
