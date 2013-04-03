@@ -267,6 +267,8 @@ window.debug = (function ()
 	that.setLevel = function (level)
 	{
 		log_level = typeof level === 'number' ? level : 9;
+
+		return that;
 	};
 
 	that.getLevel = function() {
@@ -314,6 +316,8 @@ window.debug = (function ()
 		{
 			exec_callback(logs[i++]);
 		}
+
+		return that;
 	};
 
 	that.setDomInsertion = function (active, className)
@@ -328,7 +332,11 @@ window.debug = (function ()
 			domWriter.className = c;
 		}
 		else
+		{
 			domWriter.parentNode.removeChild(domWriter);
+		}
+
+		return that;
 	};
 
 	function isElement(obj)
@@ -352,6 +360,8 @@ window.debug = (function ()
 		{
 			elem.innerHTML = logs.join('<br />');
 		}
+
+		return that;
 	};
 
 	return that;
