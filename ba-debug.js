@@ -1,5 +1,9 @@
-/*!
- * JavaScript Debug - v0.4 - 6/22/2010
+/*
+ * Derived work
+ * Copyright 2010 SOFTEC sa. All rights reserved.
+ *
+ * Original work
+ *   JavaScript Debug - v0.4 - 6/22/2010
  * http://benalman.com/projects/javascript-debug-console-log/
  *
  * Copyright (c) 2010 "Cowboy" Ben Alman
@@ -50,6 +54,11 @@
 // methods will not be passed through if the logging level is set to 0 via
 // <debug.setLevel>.
 
+//
+// Here is a bookmarket for activating firebuglite and dump the history log:
+// javascript:(function(F,i,r,e,b,u,g,L,I,T,E){if(F.getElementById(b))return;E=F[i+'NS']&&F.documentElement.namespaceURI;E=E?F[i+'NS'](E,'script'):F[i]('script');E[r]('id',b);E[r]('src',I+g);E[r](b,u);E.text=T;(F[e]('head')[0]||F[e]('body')[0]).appendChild(E);E=new%20Image;E[r]('src',I+L);})(document,'createElement','setAttribute','getElementsByTagName','FirebugLite','4','firebug-lite.js','releases/lite/latest/skin/xp/sprite.png','https://getfirebug.com/','{startOpened:true,onLoad:function(){if(window.debug&&debug.setCallback){debug.setCallback(function(b){var a=Array.prototype.slice.call(arguments,!!console[b]),b=console[b]||((a[0]=b.toUpperCase())&&console.log);b.apply(console,a);},true)}}}');
+//
+
 window.debug = (function ()
 {
 	var window = this,
@@ -65,21 +74,23 @@ window.debug = (function ()
 	callback_func,
 	callback_force,
 
-	// Default logging level, show everything.
-	log_level = 9,
+    // Default logging level, show everything.
+    default_log_level = 5,
+    log_level = 5,
 
-	// Logging methods, in "priority order". Not all console implementations
-	// will utilize these, but they will be used in the callback passed to
-	// setCallback.
-	log_methods = ['error', 'warn', 'info', 'debug', 'log'],
+    // Logging methods, in "priority order". Not all console implementations
+    // will utilize these, but they will be used in the callback passed to
+    // setCallback.
+    log_methods = [ 'error', 'warn', 'info', 'debug', 'log', 'callTrace' ],
 
 	// Pass these methods through to the console if they exist, otherwise just
 	// fail gracefully. These methods are provided for convenience.
 	pass_methods = 'assert clear count dir dirxml exception group groupCollapsed groupEnd profile profileEnd table time timeEnd trace'.split(' '),
 	idx = pass_methods.length,
 
-	domInsertion = false,
-	domWriter = document.createElement('div'),
+    domInsertion = false,
+    domArgJoin = [": ", ", "],                  // either an array of strings or a user-defined function; used to join array elements (see join_arr())
+    domWriter = document.createElement('div'),
 
 	// Logs are stored here so that they can be recalled as necessary.
 	logs = [];
@@ -119,7 +130,7 @@ window.debug = (function ()
 	idx = log_methods.length;
 	while (--idx >= 0)
 	{
-		(function (idx, level)
+        (function( idx, level, logger, Ulevel, withLevel )
 		{
 
 			// Method: debug.log
@@ -199,7 +210,7 @@ window.debug = (function ()
 				logs.push(log_arr);
 				if (domInsertion)
 				{
-					var txtNode = document.createTextNode(log_arr);
+                    var txtNode = document.createTextNode(join_arr(log_arr, domArgJoin));
 					domWriter.appendChild(txtNode);
 					domWriter.appendChild(document.createElement('br'));
 				}
@@ -210,16 +221,25 @@ window.debug = (function ()
 				if (!is_level(idx))
 					return;
 
+                if ( withLevel ) {
+                    args = [ Ulevel ].concat( args );
+                }
+
 				if (!con && !domInsertion)
 				{
 					//alert('Meh! You have no console :-( You should use debug.setDomInsertion(true); or debug.exportLogs();');
 					return;
 				}
 
-				con[level] ? trace(level, args) : trace('log', args); // Degradation path
-			};
+                con[logger] ? trace(logger, args) : trace('log', args); // Degradation path
+            };
 
-		})(idx, log_methods[idx]);
+            // Check if provided level is currently actively logged
+            that['is' + level.substring(0, 1).toUpperCase() + level.substring(1) + 'Enabled'] = function() {
+                return is_level(idx);
+            };
+
+        })(idx, log_methods[idx], log_methods[Math.min(idx, 4)], log_methods[idx].toUpperCase(), idx > 4 );
 	}
 
 	// Call the browser console logger
@@ -233,7 +253,25 @@ window.debug = (function ()
 		{
 			con[level](args.join(' ')); // IE 8 (at least)
 		}
-	}
+    }
+
+    // Join arguments using the specified separator(s):
+    function join_arr(arr, seps) {
+        var rv = "";
+        var i, si;
+
+        if (typeof seps === "function") {
+            return seps.call(arr, seps);
+        }
+        for (i = 0; i < arr.length - 1; i++) {
+            si = Math.min(i, seps.length - 1);
+            rv += String(arr[i]) + String(seps[si]);
+        }
+        if (i < arr.length) {
+            rv += arr[i];
+        }
+        return rv;
+    }
 
 	// Execute the callback function if set.
 	function exec_callback(args)
@@ -262,11 +300,12 @@ window.debug = (function ()
 	//
 	// Priority levels:
 	//
-	//   log (1) < debug (2) < info (3) < warn (4) < error (5)
+    //   callTrace(-1) < log (-2) < debug (-3) < info (-4) < warn (-5) < error (-6)
+    //   callTrace(6) > log (5) > debug (4) > info (3) > warn (2) > error (1)
 
 	that.setLevel = function (level)
 	{
-		log_level = typeof level === 'number' ? level : 9;
+        log_level = typeof level === 'number' ? level : default_log_level;
 
 		return that;
 	};
@@ -276,6 +315,8 @@ window.debug = (function ()
 	};
 
 	// Determine if the level is visible given the current log_level.
+    //
+    // Note that level is minus one compared to log_level
 	function is_level(level)
 	{
 		return log_level > 0 ? log_level > level : log_methods.length + log_level <= level;
@@ -320,9 +361,15 @@ window.debug = (function ()
 		return that;
 	};
 
-	that.setDomInsertion = function (active, className)
-	{
-		domInsertion = active;
+    that.setDomInsertion = function (active, className, arg_join)
+    {
+        domInsertion = active;
+        if (typeof arg_join === "function") {
+            domArgJoin = arg_join;
+        } else if (domArgJoin) {
+            // http://stackoverflow.com/questions/4775722/javascript-check-if-object-is-array
+            domArgJoin = [].concat(arg_join);
+        }
 		if (active && document.body)
 		{
 			document.body.appendChild(domWriter);
