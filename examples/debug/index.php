@@ -23,7 +23,7 @@ var a = 0,
 function log_stuff() {
   a++;
   d = !d;
-  
+
   debug.group( 'start of group' );
   debug.log( a );
   debug.debug( b );
@@ -31,14 +31,14 @@ function log_stuff() {
   debug.warn( d );
   debug.error( e );
   debug.groupEnd();
-  
+
   debug.time( 'test' );
-  
+
   debug.log( a, b, c, d, e );
   debug.log([ a, b, c, d, e ]);
-  
+
   (function() { debug.log( arguments ); })( a, b, c, d, e );
-  
+
   debug.timeEnd( 'test' );
 };
 <?
@@ -65,13 +65,13 @@ log_stuff();
 
 
 $(function(){
-  
+
   var nav = $('#nav ul');
-  
+
   if ( qs.level !== undefined ) {
     $('#setLevel').querystring( {}, 2 );
   }
-  
+
   $('<li/>')
     .appendTo( nav )
     .append('Don\'t have a console? Debug output will be stored until you: <ul/>')
@@ -89,7 +89,7 @@ $(function(){
           init_callback_inpage();
           return false;
         });
-  
+
   $('<li/>')
     .appendTo( nav )
     .append('On this page <a href="#"><code>log_stuff();<\/code><\/a> is executed once when the page loads, and yes, the console error is intentional. Click this link again for more log output.')
@@ -98,25 +98,25 @@ $(function(){
         log_stuff();
         return false;
       });
-  
+
   SyntaxHighlighter.highlight();
 });
 
 function init_callback_inpage() {
-  function debug_callback( level ) { 
-    var args = Array.prototype.slice.call( arguments, 1 ); 
-    $('#debug').length || $('<div id="debug"><h2>debug output<\/h2><\/div>').appendTo( 'body' ); 
-    $('<div/>') 
-      .addClass( 'debug-' + level ) 
-      .html( '[' + level + '] ' + args ) 
-      .appendTo( '#debug' ); 
+  function debug_callback( level ) {
+    var args = Array.prototype.slice.call( arguments, 1 );
+    $('#debug').length || $('<div id="debug"><h2>debug output<\/h2><\/div>').appendTo( 'body' );
+    $('<div/>')
+      .addClass( 'debug-' + level )
+      .html( '[' + level + '] ' + args )
+      .appendTo( '#debug' );
   };
   debug.setCallback( debug_callback, true );
 }
 
 function init_callback_firebuglite() {
   if ( !window.firebug ) {
-    
+
     // from firebug lite bookmarklet
     window.firebug = document.createElement('script');
     firebug.setAttribute( 'src', 'http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js' );
@@ -129,7 +129,7 @@ function init_callback_firebuglite() {
       }
     })();
     void( firebug );
-    
+
     if ( window.debug && debug.setCallback ) {
       (function(){
         if ( window.firebug && window.firebug.version ) {

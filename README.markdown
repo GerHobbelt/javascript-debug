@@ -23,6 +23,6 @@ Internet Explorer 6-8, Firefox 3-3.6, Safari 3-4, Chrome 3-5, Opera 9.6-10.5
 
 
 ## License ##
-Copyright (c) 2010 "Cowboy" Ben Alman  
-Dual licensed under the MIT and GPL licenses.  
+Copyright (c) 2010 "Cowboy" Ben Alman
+Dual licensed under the MIT and GPL licenses.
 [http://benalman.com/about/license/](http://benalman.com/about/license/)

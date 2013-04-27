@@ -472,9 +472,9 @@ pre code {
 }
 
 pre,
-.syntaxhighlighter, 
-.syntaxhighlighter div, 
-.syntaxhighlighter code, 
+.syntaxhighlighter,
+.syntaxhighlighter div,
+.syntaxhighlighter code,
 .syntaxhighlighter span {
   font-size: 11px !important;
   line-height: 1.5em !important;
@@ -494,7 +494,7 @@ pre,
   min-height: 0\9 !important; /* IE6, IE7, IE8 */
 }
 
-.syntaxhighlighter, 
+.syntaxhighlighter,
 .syntaxhighlighter code,
 .syntaxhighlighter a {
   word-wrap: break-word !important;
