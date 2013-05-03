@@ -181,9 +181,9 @@ window.debug = (function(){
         
         if ( !con || !is_level( idx ) ) { return; }
         
-        con.firebug ? con[ level ].apply( window, args )
-          : con[ level ] ? con[ level ]( args )
-          : con.log( args );
+       // Function.prototype.apply.apply must be used because in IE,
+       // console functions aren't normal functions and don't have apply()
+        Function.prototype.apply.apply( con [ level ] || con.log, [ con, args ] );
       };
       
     })( idx, log_methods[idx] );
