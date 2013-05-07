@@ -88,8 +88,9 @@ window.debug = (function ()
     pass_methods = 'assert clear count dir dirxml exception group groupCollapsed groupEnd profile profileEnd table time timeEnd trace'.split(' '),
     idx = pass_methods.length,
 
-    domInsertion = false,
-    domArgJoin = [": ", ", "],                  // either an array of strings or a user-defined function; used to join array elements (see join_arr())
+    domInsertion = false,               // false, null (~delayed) or DOM node (parent) to append log to (default DOM parent = document.body)
+    domClassName = 'debug',             // classname applied to the DOMnode parent to assist styling of the log output
+    domArgJoin = [": ", ", "],          // either an array of strings or a user-defined function; used to join array elements (see join_arr())
     domWriter = document.createElement('div'),
 
     // Logs are stored here so that they can be recalled as necessary.
@@ -207,6 +208,12 @@ window.debug = (function ()
                 log_arr = [level].concat(args);
 
                 logs.push(log_arr);
+
+                // when the domInsertion is marked as 'delayed' try to set it up as default (document.body) again (and again later, until we're good):
+                if (domInsertion === null) {
+                    that.setDomInsertion(true);
+                }
+
                 if (domInsertion)
                 {
                     var txtNode = document.createTextNode(join_arr(log_arr, domArgJoin));
@@ -261,7 +268,7 @@ window.debug = (function ()
 
         if (typeof seps === "function") {
             return seps.call(arr, seps);
-        } 
+        }
         for (i = 0; i < arr.length - 1; i++) {
             si = Math.min(i, seps.length - 1);
             rv += String(arr[i]) + String(seps[si]);
@@ -305,6 +312,8 @@ window.debug = (function ()
     that.setLevel = function (level)
     {
         log_level = typeof level === 'number' ? level : default_log_level;
+
+        return that;
     };
 
     that.getLevel = function() {
@@ -354,29 +363,45 @@ window.debug = (function ()
         {
             exec_callback(logs[i++]);
         }
+
+        return that;
     };
 
+    // `active`:    (boolean / DOMnode) can be FALSE, TRUE or a DOM node: when specifying a DOM node, that will be the parent to with the log will be appended.
+    // `classname`: (null/string) the class applied to each log entry (default: 'debug'): use this to make CSS styling of the output log easier by targeting the class.
+    // `arg_join`:  (null/array/function) can be an array of strings, which will be used as join strings between the log/trace arguments, or it can be custom function which does the joining for the debug component: arg_join(args_arr, sep_arr) -> string
     that.setDomInsertion = function (active, className, arg_join)
     {
-        domInsertion = active;
         if (typeof arg_join === "function") {
             domArgJoin = arg_join;
         } else if (domArgJoin) {
             // http://stackoverflow.com/questions/4775722/javascript-check-if-object-is-array
             domArgJoin = [].concat(arg_join);
         }
-        if (active && document.body)
+
+        if (!active) {
+            domInsertion = false;
+        } else if (typeof active.appendChild === "function") {
+            domInsertion = active;              // parent DOMnode set
+        } else if (document.body && document.body.appendChild) {
+            domInsertion = document.body;
+        } else {
+            domInsertion = null;                // parent DOMnode (document.body) delayed setup, i.e. use it once it becomes available (WARNING: lower performance!)
+        }
+
+        if (domInsertion)
         {
-            document.body.appendChild(domWriter);
-            var c = 'debug';
-            if (typeof (className) == 'string')
-                c = className;
-            domWriter.className = c;
+            domInsertion.appendChild(domWriter);
+            if (typeof className === 'string')
+                domClassName = className;
+            domWriter.className = domClassName;
         }
         else
         {
             domWriter.parentNode.removeChild(domWriter);
         }
+
+        return that;
     };
 
     function isElement(obj)
@@ -400,6 +425,8 @@ window.debug = (function ()
         {
             elem.innerHTML = logs.join('<br />');
         }
+
+        return that;
     };
 
     return that;

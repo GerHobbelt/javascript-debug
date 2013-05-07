@@ -1,8 +1,11 @@
 .DS_Store
 
 # Editor backup files
-*.bak
 *~
+*.bak
+
+# MSOffice temporary files
+~*
 
 # NodeJS/NPM crud
 node_modules

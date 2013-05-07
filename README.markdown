@@ -68,4 +68,5 @@ Debug is a derivative work from
     http://benalman.com/projects/javascript-debug-console-log/
     Copyright (c) 2010 "Cowboy" Ben Alman
 
-Debug is licenced under the MIT license.
+Dual licensed under the MIT and GPL licenses.
+[http://benalman.com/about/license/](http://benalman.com/about/license/)
